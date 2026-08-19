@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -5297,73 +5298,46 @@ function aplicarMetroEQ(){
    CONFIGURAÇÃO DE CANAL
 ========================================================= */
 
-function obterConfiguracaoCanal(
-    canal
-){
+function obterConfiguracaoCanal(canal){
 
     return {
 
-              titulo:
-            canal.querySelector(
-            ".titulo-canal"
-             ).value,
+        titulo:
+            canal.querySelector(".titulo-canal").value,
 
         nome:
-            canal.querySelector(
-                ".nome"
-            ).value,
-
+            canal.querySelector(".nome").value,
 
         observacao:
-            canal.querySelector(
-                ".observacao"
-            ).value,
-
+            canal.querySelector(".observacao").value,
 
         youtube:
-            canal.querySelector(
-                ".youtube-url"
-            ).value,
-
+            canal.querySelector(".youtube-url").value,
 
         fader:
-            canal.querySelector(
-                ".fader"
-            ).value,
-
+            Number(
+                canal.querySelector(".fader").value
+            ),
 
         pan:
-            canal.querySelector(
-                ".pan"
-            ).value,
-
+            Number(
+                canal.querySelector(".pan").value
+            ),
 
         mute:
-            canal.querySelector(
-                ".mute"
-            ).classList.contains(
-                "ativo"
-            ),
-
+            canal.querySelector(".mute")
+                .classList.contains("ativo"),
 
         solo:
-            canal.querySelector(
-                ".solo"
-            ).classList.contains(
-                "ativo"
-            ),
-
+            canal.querySelector(".solo")
+                .classList.contains("ativo"),
 
         knobs:
             Array.from(
-                canal.querySelectorAll(
-                    ".knob"
-                )
+                canal.querySelectorAll(".knob")
             ).map(
                 knob =>
-                    Number(
-                        knob.dataset.valor
-                    )
+                    Number(knob.dataset.valor)
             )
 
     };
@@ -5375,115 +5349,125 @@ function obterConfiguracaoCanal(
    APLICAR CONFIGURAÇÃO DO CANAL
 ========================================================= */
 
-function aplicarConfiguracaoCanal(
-    canal,
-    dados
-){
+function aplicarConfiguracaoCanal(canal, dados){
 
     if(!dados)
         return;
 
 
-    canal.querySelector(
-        ".nome"
-    ).value =
+    /* =====================================================
+       TÍTULO CH 1, CH 2, CH 3...
+    ===================================================== */
+
+    canal.querySelector(".titulo-canal").value =
+        dados.titulo ||
+        `CH ${canal.dataset.numero}`;
+
+
+    /* =====================================================
+       NOME
+    ===================================================== */
+
+    canal.querySelector(".nome").value =
         dados.nome ||
         "";
 
 
-    canal.querySelector(
-        ".observacao"
-    ).value =
+    /* =====================================================
+       OBSERVAÇÃO
+    ===================================================== */
+
+    canal.querySelector(".observacao").value =
         dados.observacao ||
         "";
 
 
-    canal.querySelector(
-        ".youtube-url"
-    ).value =
+    /* =====================================================
+       YOUTUBE
+    ===================================================== */
+
+    canal.querySelector(".youtube-url").value =
         dados.youtube ||
         "";
 
 
-    canal.querySelector(
-        ".fader"
-    ).value =
-        dados.fader ??
-        75;
+    /* =====================================================
+       FADER
+    ===================================================== */
+
+    const fader =
+        dados.fader ?? 75;
+
+    canal.querySelector(".fader").value =
+        fader;
+
+    canal.querySelector(".valor-fader").textContent =
+        fader + "%";
 
 
-    canal.querySelector(
-        ".valor-fader"
-    ).textContent =
-        (
-            dados.fader ??
-            75
-        ) + "%";
+    /* =====================================================
+       PAN
+    ===================================================== */
+
+    canal.querySelector(".pan").value =
+        dados.pan ?? 0;
 
 
-    canal.querySelector(
-        ".pan"
-    ).value =
-        dados.pan ??
-        0;
+    /* =====================================================
+       MUTE
+    ===================================================== */
 
+    const mute =
+        Boolean(dados.mute);
 
-    canal.querySelector(
-        ".mute"
-    ).classList.toggle(
-        "ativo",
-        Boolean(
-            dados.mute
-        )
-    );
-
-
-    canal.querySelector(
-        ".solo"
-    ).classList.toggle(
-        "ativo",
-        Boolean(
-            dados.solo
-        )
-    );
-
+    canal.querySelector(".mute")
+        .classList.toggle(
+            "ativo",
+            mute
+        );
 
     canal.classList.toggle(
         "mutado",
-        Boolean(
-            dados.mute
-        )
+        mute
     );
 
+
+    /* =====================================================
+       SOLO
+    ===================================================== */
+
+    const solo =
+        Boolean(dados.solo);
+
+    canal.querySelector(".solo")
+        .classList.toggle(
+            "ativo",
+            solo
+        );
 
     canal.classList.toggle(
         "solo-canal",
-        Boolean(
-            dados.solo
-        )
+        solo
     );
 
 
+    /* =====================================================
+       KNOBS
+       GAIN / AGUDO / MÉDIO / GRAVE
+    ===================================================== */
+
     const knobs =
-        canal.querySelectorAll(
-            ".knob"
-        );
+        canal.querySelectorAll(".knob");
 
-
-    if(
-        Array.isArray(
-            dados.knobs
-        )
-    ){
+    if(Array.isArray(dados.knobs)){
 
         dados.knobs.forEach(
-            (valor,i) => {
+            (valor, i) => {
 
                 if(knobs[i]){
 
                     knobs[i].dataset.valor =
-                        valor;
-
+                        Number(valor);
 
                     atualizarVisualKnob(
                         knobs[i]
@@ -5497,28 +5481,18 @@ function aplicarConfiguracaoCanal(
     }
 
 
-    /*
-       Aplica os controles de áudio,
-       inclusive MUTE/SOLO.
-    */
+    /* =====================================================
+       APLICA ÁUDIO
+    ===================================================== */
 
-    aplicarControlesCanal(
-        canal
-    );
+    aplicarControlesCanal(canal);
 
 
-    /*
-       Se a cena tiver um link do YouTube,
-       abrimos automaticamente.
+    /* =====================================================
+       YOUTUBE
+    ===================================================== */
 
-       Isso também faz o fader salvo ser
-       aplicado ao YouTube quando o player
-       ficar pronto.
-    */
-
-    if(
-        dados.youtube
-    ){
+    if(dados.youtube){
 
         abrirYoutubeDoCanal(
             canal
@@ -5527,7 +5501,6 @@ function aplicarConfiguracaoCanal(
     }
 
 }
-
 
 /* =========================================================
    RESTAURAR DADOS
